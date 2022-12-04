@@ -1,9 +1,13 @@
 from flask import Flask
 from flask import render_template, request, redirect, url_for
 from flask_sqlalchemy import SQLAlchemy
+from prometheus_flask_exporter import PrometheusMetrics
 
 app = Flask(__name__)
+PrometheusMetrics(app)
+
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///todo.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 db = SQLAlchemy(app)
 
 class Todo(db.Model):
@@ -13,6 +17,10 @@ class Todo(db.Model):
 
 with app.app_context():
     db.create_all()
+
+endpoints = ("/","/update")
+
+
 
 @app.route("/")
 def index():
@@ -28,11 +36,11 @@ def add():
     # return data # DEBUG REQUEST
     return redirect(url_for("index"))
 
-
 @app.route('/update', methods=["POST"])
 def update():
     # return request.form # DEBUG REQUEST
     return redirect(url_for("index"))
 
+
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, threaded=True)
